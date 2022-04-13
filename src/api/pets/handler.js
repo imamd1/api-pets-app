@@ -6,15 +6,16 @@ class PetsHandler {
     
     this.addPetHandler = this.addPetHandler.bind(this);
     this.getPetsHandler = this.getPetsHandler.bind(this);
+    this.getPetByIdHandler = this.getPetByIdHandler.bind(this);
+    this.editPetByIdHandler = this.editPetByIdHandler.bind(this);
+    this.deletePetByIdHandler = this.deletePetByIdHandler.bind(this);
   }
 
   async addPetHandler(request, h) {
     try {
-      // const { statusId } = request.params;
-      const { name, latin_name, statusId, category } = request.payload;
+      const { name, latin_name, category, status, detail } = request.payload;
 
-      // console.log(request.params);
-      const petId = await this._service.addPet({name, latin_name, statusId, category});
+      const petId = await this._service.addPet({name, latin_name, category, status, detail});
 
       return {
         status: 'created',
@@ -79,7 +80,16 @@ class PetsHandler {
 
   async getPetByIdHandler(request, h) {
     try {
-      
+      const { petId } = request.params;
+      const pet = await this._service.getDetailPetById(petId);
+
+      const response = h.response({
+        status: 'success',
+        data: {
+          pet
+        }
+      });
+      return response;
     } catch (error) {
       if (error instanceof ClientError) {
         const response = h.response({
@@ -105,7 +115,17 @@ class PetsHandler {
 
   async editPetByIdHandler(request, h) {
     try {
-      
+      const { petId } = request.params;
+      const { name, latin_name, category, status, detail } = request.payload;
+
+      const pet = await this._service.editPetById({petId, name, latin_name, category, status, detail});
+
+      const response = h.response({
+        status: 'success',
+        message: 'Data berhasil diperbarui',
+        data: pet
+      });
+      return response;
     } catch (error) {
       if (error instanceof ClientError) {
         const response = h.response({
@@ -131,7 +151,17 @@ class PetsHandler {
 
   async deletePetByIdHandler(request, h) {
     try {
+      const { petId } = request.params;
       
+      await this._service.deletePetById(petId);
+
+      const response = h.response({
+        status: 'deleted',
+        message: 'Data pet berhasil dihapus'
+      });
+
+      return response;
+
     } catch (error) {
       if (error instanceof ClientError) {
         const response = h.response({
